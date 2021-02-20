@@ -1,21 +1,25 @@
 #include <Arduino.h>
+#include "Adafruit_FreeTouch.h"
 
 extern "C" {
 #include <stddef.h>
-#include "tiny_timer.h"
-#include "tiny_time_source.h"
-#include "tiny_heartbeat.h"
+#include "tiny_digital_output.h"
 }
 
-static tiny_timer_group_t timer_group;
+static tiny_digital_output_t led;
+static Adafruit_FreeTouch touch = Adafruit_FreeTouch(
+  A0,
+  OVERSAMPLE_4,
+  RESISTOR_0,
+  FREQ_MODE_NONE);
 
 void setup()
 {
-  tiny_timer_group_init(&timer_group, tiny_time_source_init());
-  tiny_heartbeat_init(&timer_group, 1000);
+  tiny_digital_output_init(&led, LED_BUILTIN);
+  touch.begin();
 }
 
 void loop()
 {
-  tiny_timer_group_run(&timer_group);
+  tiny_digital_output_write(&led.interface, touch.measure() < 900);
 }
